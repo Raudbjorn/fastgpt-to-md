@@ -1,18 +1,21 @@
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FastGPT To Markdown</title>
     <link rel="stylesheet" href="popup.css">
   </head>
 
   <body>
     <div class="title">
-      <h3>FastGPT</h3>
+      <h3>FastGPT to Markdown</h3>
     </div>
     <div class="container">
-      <a id="copyButton">Copy to MarkDown</a>
+      <button id="copyButton">Copy to Markdown</button>
     </div>
+    <div id="statusMessage" class="status-message"></div>
   </body>
   <script type="text/javascript" src="../libs/turndown.umd.js"></script>
   <script type="text/javascript" src="popup.js"></script>
 </html>
-
