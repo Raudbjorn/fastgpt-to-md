@@ -130,6 +130,15 @@ h2 {
   height: 14px;
 }
 
+.source-link {
+  color: #60a5fa;
+  text-decoration: none;
+}
+
+.source-link:hover {
+  text-decoration: underline;
+}
+
 .history-item-preview {
   background-color: #2d2d3d;
   padding: 12px;

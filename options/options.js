@@ -52,18 +52,22 @@ document.addEventListener('DOMContentLoaded', async function () {
 
   // Clear all history
   clearAllHistoryButton.addEventListener('click', async () => {
-    if (confirm('Are you sure you want to clear all export history? This action cannot be undone.')) {
-      try {
-        await chrome.storage.local.set({ exportHistory: [] });
-        showStatus('All history cleared', 'success');
-      } catch (error) {
-        console.error('Error clearing history:', error);
-        showStatus('Failed to clear history', 'error');
+    showConfirmDialog(
+      'Clear All History?',
+      'Are you sure you want to clear all export history? This action cannot be undone.',
+      async () => {
+        try {
+          await chrome.storage.local.set({ exportHistory: [] });
+          showStatus('All history cleared', 'success');
+        } catch (error) {
+          console.error('Error clearing history:', error);
+          showStatus('Failed to clear history', 'error');
+        }
       }
-    }
+    );
   });
 
-  async function loadSettings() {
+  const loadSettings = async () => {
     try {
       const defaults = {
         includeQuestion: true,
@@ -84,9 +88,9 @@ document.addEventListener('DOMContentLoaded', async function () {
       console.error('Error loading settings:', error);
       showStatus('Failed to load settings', 'error');
     }
-  }
+  };
 
-  function showStatus(message, type) {
+  const showStatus = (message, type) => {
     statusMessage.textContent = message;
     statusMessage.className = `status-message ${type}`;
 
@@ -96,5 +100,53 @@ document.addEventListener('DOMContentLoaded', async function () {
         statusMessage.className = 'status-message';
       }, 3000);
     }
-  }
+  };
+
+  const showConfirmDialog = (title, message, onConfirm) => {
+    const dialog = document.createElement('div');
+    dialog.className = 'confirm-dialog';
+
+    const content = document.createElement('div');
+    content.className = 'confirm-content';
+
+    const h2 = document.createElement('h2');
+    h2.textContent = title;
+
+    const p = document.createElement('p');
+    p.textContent = message;
+
+    const actions = document.createElement('div');
+    actions.className = 'confirm-actions';
+
+    const cancelButton = document.createElement('button');
+    cancelButton.className = 'confirm-button cancel';
+    cancelButton.textContent = 'Cancel';
+
+    const confirmButton = document.createElement('button');
+    confirmButton.className = 'confirm-button confirm';
+    confirmButton.textContent = 'Confirm';
+
+    actions.appendChild(cancelButton);
+    actions.appendChild(confirmButton);
+
+    content.appendChild(h2);
+    content.appendChild(p);
+    content.appendChild(actions);
+
+    dialog.appendChild(content);
+
+    document.body.appendChild(dialog);
+    setTimeout(() => dialog.classList.add('show'), 10);
+
+    cancelButton.addEventListener('click', () => {
+      dialog.classList.remove('show');
+      setTimeout(() => dialog.remove(), 300);
+    });
+
+    confirmButton.addEventListener('click', async () => {
+      dialog.classList.remove('show');
+      setTimeout(() => dialog.remove(), 300);
+      await onConfirm();
+    });
+  };
 });

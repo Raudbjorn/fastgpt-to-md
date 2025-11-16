@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     );
   });
 
-  async function loadHistory() {
+  const loadHistory = async () => {
     try {
       const { exportHistory = [] } = await chrome.storage.local.get('exportHistory');
 
@@ -54,9 +54,9 @@ document.addEventListener('DOMContentLoaded', async function () {
       console.error('Error loading history:', error);
       showToast('Failed to load history', 'error');
     }
-  }
+  };
 
-  function createHistoryItem(item, index) {
+  const createHistoryItem = (item, index) => {
     const div = document.createElement('div');
     div.className = 'history-item';
 
@@ -68,72 +68,95 @@ document.addEventListener('DOMContentLoaded', async function () {
     const preview = item.content.substring(0, 300);
     const isTruncated = item.content.length > 300;
 
-    div.innerHTML = `
-      <div class="history-item-header">
-        <div class="history-item-info">
-          <div class="history-item-question">${escapeHtml(item.question || 'Untitled Export')}</div>
-          <div class="history-item-meta">
-            <div class="meta-item">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-              <span>${formattedDate} at ${formattedTime}</span>
-            </div>
-            ${item.url ? `
-              <div class="meta-item">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
-                </svg>
-                <a href="${escapeHtml(item.url)}" target="_blank" style="color: #60a5fa; text-decoration: none;">View Source</a>
-              </div>
-            ` : ''}
-            <div class="meta-item">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-              </svg>
-              <span>${item.content.length} characters</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="history-item-preview" id="preview-${index}">
-        <div class="preview-content">${escapeHtml(preview)}${isTruncated ? '...' : ''}</div>
-        ${isTruncated ? '<div class="preview-fade"></div>' : ''}
-      </div>
-      <div class="history-item-actions">
-        <button class="action-button primary" data-action="copy" data-index="${index}">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-          </svg>
-          Copy to Clipboard
-        </button>
-        ${isTruncated ? `
-          <button class="action-button" data-action="expand" data-index="${index}">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-            </svg>
-            Show Full
-          </button>
-        ` : ''}
-        <button class="action-button" data-action="download" data-index="${index}">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-          </svg>
-          Download
-        </button>
-        <button class="action-button" data-action="delete" data-index="${index}">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-          </svg>
-          Delete
-        </button>
-      </div>
-    `;
+    // Build DOM structure safely without innerHTML
+    const header = document.createElement('div');
+    header.className = 'history-item-header';
+
+    const info = document.createElement('div');
+    info.className = 'history-item-info';
+
+    const questionDiv = document.createElement('div');
+    questionDiv.className = 'history-item-question';
+    questionDiv.textContent = item.question || 'Untitled Export';
+
+    const meta = document.createElement('div');
+    meta.className = 'history-item-meta';
+
+    // Time meta item
+    const timeItem = createMetaItem(`${formattedDate} at ${formattedTime}`, 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z');
+    meta.appendChild(timeItem);
+
+    // URL meta item (if exists)
+    if (item.url) {
+      const urlItem = document.createElement('div');
+      urlItem.className = 'meta-item';
+      const svg = createSVG('M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1');
+      const link = document.createElement('a');
+      link.href = item.url;
+      link.target = '_blank';
+      link.className = 'source-link';
+      link.textContent = 'View Source';
+      urlItem.appendChild(svg);
+      urlItem.appendChild(link);
+      meta.appendChild(urlItem);
+    }
+
+    // Characters meta item
+    const charsItem = createMetaItem(`${item.content.length} characters`, 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z');
+    meta.appendChild(charsItem);
+
+    info.appendChild(questionDiv);
+    info.appendChild(meta);
+    header.appendChild(info);
+
+    // Preview section
+    const previewDiv = document.createElement('div');
+    previewDiv.className = 'history-item-preview';
+    previewDiv.id = `preview-${index}`;
+
+    const previewContent = document.createElement('div');
+    previewContent.className = 'preview-content';
+    previewContent.textContent = preview + (isTruncated ? '...' : '');
+
+    previewDiv.appendChild(previewContent);
+
+    if (isTruncated) {
+      const fade = document.createElement('div');
+      fade.className = 'preview-fade';
+      previewDiv.appendChild(fade);
+    }
+
+    // Actions section
+    const actions = document.createElement('div');
+    actions.className = 'history-item-actions';
+
+    // Copy button
+    const copyBtn = createActionButton('copy', index, 'M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z', 'Copy to Clipboard', true);
+    actions.appendChild(copyBtn);
+
+    // Expand button (if truncated)
+    if (isTruncated) {
+      const expandBtn = createActionButton('expand', index, 'M19 9l-7 7-7-7', 'Show Full', false);
+      actions.appendChild(expandBtn);
+    }
+
+    // Download button
+    const downloadBtn = createActionButton('download', index, 'M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4', 'Download', false);
+    actions.appendChild(downloadBtn);
+
+    // Delete button
+    const deleteBtn = createActionButton('delete', index, 'M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16', 'Delete', false);
+    actions.appendChild(deleteBtn);
+
+    // Assemble the div
+    div.appendChild(header);
+    div.appendChild(previewDiv);
+    div.appendChild(actions);
 
     // Add event listeners
     div.querySelectorAll('.action-button').forEach(button => {
       button.addEventListener('click', async (e) => {
-        const action = button.dataset.action;
+        const { action } = button.dataset;
         const itemIndex = parseInt(button.dataset.index);
 
         switch (action) {
@@ -143,22 +166,16 @@ document.addEventListener('DOMContentLoaded', async function () {
             break;
           case 'expand':
             togglePreview(index, item.content);
-            button.innerHTML = `
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
-              </svg>
-              Show Less
-            `;
+            // Update button to "Show Less"
+            button.querySelector('svg').querySelector('path').setAttribute('d', 'M5 15l7-7 7 7');
+            button.querySelector('.button-label').textContent = 'Show Less';
             button.dataset.action = 'collapse';
             break;
           case 'collapse':
             togglePreview(index, item.content, false);
-            button.innerHTML = `
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-              </svg>
-              Show Full
-            `;
+            // Update button to "Show Full"
+            button.querySelector('svg').querySelector('path').setAttribute('d', 'M19 9l-7 7-7-7');
+            button.querySelector('.button-label').textContent = 'Show Full';
             button.dataset.action = 'expand';
             break;
           case 'download':
@@ -173,32 +190,92 @@ document.addEventListener('DOMContentLoaded', async function () {
     });
 
     return div;
-  }
+  };
 
-  function togglePreview(index, fullContent, expand = true) {
+  // Helper function to create SVG element
+  const createSVG = (pathData) => {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('fill', 'none');
+    svg.setAttribute('stroke', 'currentColor');
+    svg.setAttribute('viewBox', '0 0 24 24');
+
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('stroke-linecap', 'round');
+    path.setAttribute('stroke-linejoin', 'round');
+    path.setAttribute('stroke-width', '2');
+    path.setAttribute('d', pathData);
+
+    svg.appendChild(path);
+    return svg;
+  };
+
+  // Helper function to create meta item
+  const createMetaItem = (text, svgPath) => {
+    const item = document.createElement('div');
+    item.className = 'meta-item';
+
+    const svg = createSVG(svgPath);
+    const span = document.createElement('span');
+    span.textContent = text;
+
+    item.appendChild(svg);
+    item.appendChild(span);
+    return item;
+  };
+
+  // Helper function to create action button
+  const createActionButton = (action, index, svgPath, label, isPrimary = false) => {
+    const button = document.createElement('button');
+    button.className = isPrimary ? 'action-button primary' : 'action-button';
+    button.dataset.action = action;
+    button.dataset.index = index;
+
+    const svg = createSVG(svgPath);
+    const labelSpan = document.createElement('span');
+    labelSpan.className = 'button-label';
+    labelSpan.textContent = label;
+
+    button.appendChild(svg);
+    button.appendChild(labelSpan);
+
+    return button;
+  };
+
+  const togglePreview = (index, fullContent, expand = true) => {
     const preview = document.getElementById(`preview-${index}`);
     const previewContent = preview.querySelector('.preview-content');
+    const fadeElem = preview.querySelector('.preview-fade');
 
     if (expand) {
       preview.classList.add('expanded');
       previewContent.textContent = fullContent;
+      // Remove fade element when showing full content
+      if (fadeElem) {
+        fadeElem.remove();
+      }
     } else {
       preview.classList.remove('expanded');
       const truncated = fullContent.substring(0, 300);
       previewContent.textContent = truncated + (fullContent.length > 300 ? '...' : '');
+      // Re-add fade element when collapsing
+      if (!fadeElem && fullContent.length > 300) {
+        const newFade = document.createElement('div');
+        newFade.className = 'preview-fade';
+        preview.appendChild(newFade);
+      }
     }
-  }
+  };
 
-  async function copyToClipboard(text) {
+  const copyToClipboard = async (text) => {
     try {
       await navigator.clipboard.writeText(text);
     } catch (error) {
       console.error('Failed to copy:', error);
       showToast('Failed to copy to clipboard', 'error');
     }
-  }
+  };
 
-  function downloadFile(content, questionText) {
+  const downloadFile = (content, questionText) => {
     const blob = new Blob([content], { type: 'text/markdown' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -215,9 +292,9 @@ document.addEventListener('DOMContentLoaded', async function () {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-  }
+  };
 
-  async function deleteHistoryItem(index) {
+  const deleteHistoryItem = async (index) => {
     showConfirmDialog(
       'Delete Export?',
       'Are you sure you want to delete this export? This action cannot be undone.',
@@ -235,9 +312,9 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
       }
     );
-  }
+  };
 
-  function showToast(message, type = 'success') {
+  const showToast = (message, type = 'success') => {
     const existingToast = document.querySelector('.toast');
     if (existingToast) {
       existingToast.remove();
@@ -256,27 +333,43 @@ document.addEventListener('DOMContentLoaded', async function () {
       toast.classList.remove('show');
       setTimeout(() => toast.remove(), 300);
     }, 3000);
-  }
+  };
 
-  function showConfirmDialog(title, message, onConfirm) {
+  const showConfirmDialog = (title, message, onConfirm) => {
     const dialog = document.createElement('div');
     dialog.className = 'confirm-dialog';
-    dialog.innerHTML = `
-      <div class="confirm-content">
-        <h2>${escapeHtml(title)}</h2>
-        <p>${escapeHtml(message)}</p>
-        <div class="confirm-actions">
-          <button class="confirm-button cancel">Cancel</button>
-          <button class="confirm-button confirm">Confirm</button>
-        </div>
-      </div>
-    `;
+
+    const content = document.createElement('div');
+    content.className = 'confirm-content';
+
+    const h2 = document.createElement('h2');
+    h2.textContent = title;
+
+    const p = document.createElement('p');
+    p.textContent = message;
+
+    const actions = document.createElement('div');
+    actions.className = 'confirm-actions';
+
+    const cancelButton = document.createElement('button');
+    cancelButton.className = 'confirm-button cancel';
+    cancelButton.textContent = 'Cancel';
+
+    const confirmButton = document.createElement('button');
+    confirmButton.className = 'confirm-button confirm';
+    confirmButton.textContent = 'Confirm';
+
+    actions.appendChild(cancelButton);
+    actions.appendChild(confirmButton);
+
+    content.appendChild(h2);
+    content.appendChild(p);
+    content.appendChild(actions);
+
+    dialog.appendChild(content);
 
     document.body.appendChild(dialog);
     setTimeout(() => dialog.classList.add('show'), 10);
-
-    const cancelButton = dialog.querySelector('.cancel');
-    const confirmButton = dialog.querySelector('.confirm');
 
     cancelButton.addEventListener('click', () => {
       dialog.classList.remove('show');
@@ -288,11 +381,6 @@ document.addEventListener('DOMContentLoaded', async function () {
       setTimeout(() => dialog.remove(), 300);
       await onConfirm();
     });
-  }
+  };
 
-  function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-  }
 });
