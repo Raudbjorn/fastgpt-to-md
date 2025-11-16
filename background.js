@@ -142,7 +142,7 @@ async function convertAndCopyToClipboard(htmlContent, settings, sourceUrl) {
 }
 
 // Save to history (runs in background context)
-async function saveToHistory(content, question, url, settings) {
+async function saveToHistory(content, question, url) {
   try {
     // Get current history
     const { exportHistory = [] } = await chrome.storage.local.get('exportHistory');
