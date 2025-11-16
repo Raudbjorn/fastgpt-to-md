@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FastGPT Export History</title>
+    <link rel="stylesheet" href="history.css">
+  </head>
+
+  <body>
+    <div class="container">
+      <header>
+        <h1>Export History</h1>
+        <p class="subtitle">Your recent FastGPT exports are saved here</p>
+        <div class="header-actions">
+          <button id="clearHistory" class="danger-button">Clear All History</button>
+        </div>
+      </header>
+
+      <div id="historyList" class="history-list">
+        <!-- History items will be inserted here -->
+      </div>
+
+      <div id="emptyState" class="empty-state" style="display: none;">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+        </svg>
+        <h2>No exports yet</h2>
+        <p>Your FastGPT exports will appear here</p>
+      </div>
+    </div>
+
+    <script src="history.js"></script>
+  </body>
+</html>

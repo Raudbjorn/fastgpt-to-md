@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FastGPT To Markdown - Options</title>
+    <link rel="stylesheet" href="options.css">
+  </head>
+
+  <body>
+    <div class="container">
+      <header>
+        <h1>FastGPT To Markdown - Options</h1>
+        <p class="subtitle">Customize how your FastGPT content is exported</p>
+      </header>
+
+      <section class="options-section">
+        <h2>Formatting Options</h2>
+
+        <div class="option-group">
+          <label for="includeQuestion">
+            <input type="checkbox" id="includeQuestion" checked>
+            <span>Include question in export</span>
+          </label>
+          <p class="description">When enabled, the original question will be included before the answer</p>
+        </div>
+
+        <div class="option-group">
+          <label for="removeHeaders">
+            <input type="checkbox" id="removeHeaders" checked>
+            <span>Remove H3 headers from answer</span>
+          </label>
+          <p class="description">Removes the first H3 header from the FastGPT answer for cleaner formatting</p>
+        </div>
+
+        <div class="option-group">
+          <label for="addTimestamp">
+            <input type="checkbox" id="addTimestamp">
+            <span>Add timestamp to export</span>
+          </label>
+          <p class="description">Includes the date and time when the content was exported</p>
+        </div>
+
+        <div class="option-group">
+          <label for="addSourceUrl">
+            <input type="checkbox" id="addSourceUrl" checked>
+            <span>Add source URL</span>
+          </label>
+          <p class="description">Includes a link to the original FastGPT page</p>
+        </div>
+      </section>
+
+      <section class="options-section">
+        <h2>History Settings</h2>
+
+        <div class="option-group">
+          <label for="maxHistoryItems">
+            <span>Maximum history items</span>
+          </label>
+          <p class="description">Number of exports to keep in history (1-200)</p>
+          <input type="number" id="maxHistoryItems" min="1" max="200" value="50" style="width: 100px; padding: 6px; border-radius: 4px; border: 1px solid #5d5d6d; background: #2d2d3d; color: #e0e0e0;">
+        </div>
+
+        <div class="option-group" style="border-left-color: #dc2626;">
+          <button id="viewHistory" class="secondary-button" style="margin-bottom: 12px;">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 16px; height: 16px;">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            View History
+          </button>
+          <button id="clearAllHistory" class="secondary-button" style="background-color: #dc2626; color: white; border: none;">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 16px; height: 16px;">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+            </svg>
+            Clear All History
+          </button>
+          <p class="description" style="margin-top: 12px;">This will permanently delete all saved exports</p>
+        </div>
+      </section>
+
+      <section class="options-section">
+        <h2>Keyboard Shortcuts</h2>
+        <p class="description">Configure keyboard shortcuts in Chrome's extension settings:</p>
+        <ul>
+          <li><code>Ctrl+Shift+M</code> (or <code>Cmd+Shift+M</code> on Mac) - Open popup</li>
+          <li><code>Ctrl+Shift+C</code> (or <code>Cmd+Shift+C</code> on Mac) - Copy to Markdown</li>
+        </ul>
+        <button id="openShortcuts" class="secondary-button">Configure Shortcuts</button>
+      </section>
+
+      <section class="options-section">
+        <h2>About</h2>
+        <p class="description">
+          This extension helps you export Kagi FastGPT conversations to Markdown format.
+          Version 2.0 includes modern Chrome APIs, better error handling, and user feedback.
+        </p>
+        <p class="description">
+          <a href="https://github.com/Raudbjorn/fastgpt-to-md" target="_blank">View on GitHub</a>
+        </p>
+      </section>
+
+      <div class="save-section">
+        <button id="saveButton" class="primary-button">Save Settings</button>
+        <span id="statusMessage" class="status-message"></span>
+      </div>
+    </div>
+
+    <script src="options.js"></script>
+  </body>
+</html>
