@@ -168,14 +168,14 @@ document.addEventListener('DOMContentLoaded', async function () {
             togglePreview(index, item.content);
             // Update button to "Show Less"
             button.querySelector('svg').querySelector('path').setAttribute('d', 'M5 15l7-7 7 7');
-            button.childNodes[1].textContent = 'Show Less';
+            button.querySelector('.button-label').textContent = 'Show Less';
             button.dataset.action = 'collapse';
             break;
           case 'collapse':
             togglePreview(index, item.content, false);
             // Update button to "Show Full"
             button.querySelector('svg').querySelector('path').setAttribute('d', 'M19 9l-7 7-7-7');
-            button.childNodes[1].textContent = 'Show Full';
+            button.querySelector('.button-label').textContent = 'Show Full';
             button.dataset.action = 'expand';
             break;
           case 'download':
@@ -231,8 +231,12 @@ document.addEventListener('DOMContentLoaded', async function () {
     button.dataset.index = index;
 
     const svg = createSVG(svgPath);
+    const labelSpan = document.createElement('span');
+    labelSpan.className = 'button-label';
+    labelSpan.textContent = label;
+
     button.appendChild(svg);
-    button.appendChild(document.createTextNode(label));
+    button.appendChild(labelSpan);
 
     return button;
   };
@@ -240,14 +244,25 @@ document.addEventListener('DOMContentLoaded', async function () {
   const togglePreview = (index, fullContent, expand = true) => {
     const preview = document.getElementById(`preview-${index}`);
     const previewContent = preview.querySelector('.preview-content');
+    const fadeElem = preview.querySelector('.preview-fade');
 
     if (expand) {
       preview.classList.add('expanded');
       previewContent.textContent = fullContent;
+      // Remove fade element when showing full content
+      if (fadeElem) {
+        fadeElem.remove();
+      }
     } else {
       preview.classList.remove('expanded');
       const truncated = fullContent.substring(0, 300);
       previewContent.textContent = truncated + (fullContent.length > 300 ? '...' : '');
+      // Re-add fade element when collapsing
+      if (!fadeElem && fullContent.length > 300) {
+        const newFade = document.createElement('div');
+        newFade.className = 'preview-fade';
+        preview.appendChild(newFade);
+      }
     }
   };
 

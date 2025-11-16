@@ -82,17 +82,30 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Remove headers if enabled
     if (settings.removeHeaders) {
-      markdownContent = markdownContent
-        .split('\n')
-        .filter(line => !line.trim().startsWith('###'))
-        .join('\n');
+      // Only remove H3 headers from the Answer section to avoid removing actual content
+      const lines = markdownContent.split('\n');
+      let inAnswerSection = false;
+      markdownContent = lines.filter(line => {
+        if (line.trim().match(/^##\s*Answer\b/i)) {
+          inAnswerSection = true;
+          return true;
+        }
+        if (line.trim().match(/^##\s*/)) {
+          inAnswerSection = false;
+          return true;
+        }
+        // Only filter out H3 headers in the answer section
+        if (inAnswerSection && line.trim().startsWith('###')) {
+          return false;
+        }
+        return true;
+      }).join('\n');
     }
 
     // Handle question inclusion
     if (!settings.includeQuestion) {
-      // Remove the question section from the markdown
-      markdownContent = markdownContent.replace(/##\s*Question\s*\n\n[^\n]*\n\n/i, '');
-      markdownContent = markdownContent.replace(/##\s*Question\s*[^\n]*\n\n/i, '');
+      // Remove the question section from the markdown with a single regex
+      markdownContent = markdownContent.replace(/##\s*Question\s*\n\n([^\n]*\n\n)?/i, '');
     }
 
     // Add timestamp if enabled
