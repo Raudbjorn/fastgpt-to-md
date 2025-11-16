@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', function () {
         throw new Error('Failed to extract content from page');
       }
 
-      const result = results[0].result;
+      const { result } = results[0];
 
       // Handle error responses
       if (typeof result === 'string') {
@@ -54,8 +54,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
       }
 
-      const htmlContent = result.html;
-      const question = result.question;
+      const { html: htmlContent, question } = result;
 
       // Get user settings
       const settings = await chrome.storage.sync.get({
@@ -77,9 +76,24 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 
-  async function copyResultToClipboard(htmlContent, settings, sourceUrl, question) {
+  const copyResultToClipboard = async (htmlContent, settings, sourceUrl, question) => {
     const turndownService = new TurndownService();
     let markdownContent = turndownService.turndown(htmlContent);
+
+    // Remove headers if enabled
+    if (settings.removeHeaders) {
+      markdownContent = markdownContent
+        .split('\n')
+        .filter(line => !line.trim().startsWith('###'))
+        .join('\n');
+    }
+
+    // Handle question inclusion
+    if (!settings.includeQuestion) {
+      // Remove the question section from the markdown
+      markdownContent = markdownContent.replace(/##\s*Question\s*\n\n[^\n]*\n\n/i, '');
+      markdownContent = markdownContent.replace(/##\s*Question\s*[^\n]*\n\n/i, '');
+    }
 
     // Add timestamp if enabled
     if (settings.addTimestamp) {
@@ -103,9 +117,9 @@ document.addEventListener('DOMContentLoaded', function () {
       console.error('Error copying text to clipboard:', error);
       throw new Error('Failed to copy to clipboard. Please grant clipboard permissions.');
     }
-  }
+  };
 
-  async function saveToHistory(content, question, url) {
+  const saveToHistory = async (content, question, url) => {
     try {
       // Get current history
       const { exportHistory = [] } = await chrome.storage.local.get('exportHistory');
@@ -136,9 +150,9 @@ document.addEventListener('DOMContentLoaded', function () {
       console.error('Error saving to history:', error);
       // Don't throw - history save failure shouldn't block the main operation
     }
-  }
+  };
 
-  function showStatus(message, type) {
+  const showStatus = (message, type) => {
     if (!statusMessage) return;
 
     statusMessage.textContent = message;
@@ -151,10 +165,10 @@ document.addEventListener('DOMContentLoaded', function () {
         statusMessage.className = 'status-message';
       }, 2000);
     }
-  }
+  };
 
   // This function runs in the context of the web page
-  function grabContent() {
+  const grabContent = () => {
     const main = document.querySelector('.content');
     const questionInput = document.querySelector('input[name="query"]');
 
@@ -186,6 +200,6 @@ document.addEventListener('DOMContentLoaded', function () {
       html: formattedContent,
       question: question
     };
-  }
+  };
 
 });

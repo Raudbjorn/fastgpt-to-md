@@ -58,23 +58,23 @@
             <span>Maximum history items</span>
           </label>
           <p class="description">Number of exports to keep in history (1-200)</p>
-          <input type="number" id="maxHistoryItems" min="1" max="200" value="50" style="width: 100px; padding: 6px; border-radius: 4px; border: 1px solid #5d5d6d; background: #2d2d3d; color: #e0e0e0;">
+          <input type="number" id="maxHistoryItems" min="1" max="200" value="50" class="number-input">
         </div>
 
-        <div class="option-group" style="border-left-color: #dc2626;">
-          <button id="viewHistory" class="secondary-button" style="margin-bottom: 12px;">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 16px; height: 16px;">
+        <div class="option-group danger">
+          <button id="viewHistory" class="secondary-button button-with-icon button-margin-bottom">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
             View History
           </button>
-          <button id="clearAllHistory" class="secondary-button" style="background-color: #dc2626; color: white; border: none;">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 16px; height: 16px;">
+          <button id="clearAllHistory" class="secondary-button button-with-icon danger-action-button">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
             </svg>
             Clear All History
           </button>
-          <p class="description" style="margin-top: 12px;">This will permanently delete all saved exports</p>
+          <p class="description description-with-margin">This will permanently delete all saved exports</p>
         </div>
       </section>
 
