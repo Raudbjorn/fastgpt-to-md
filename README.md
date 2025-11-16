@@ -5,6 +5,11 @@ A modern Chrome extension that exports Kagi's FastGPT questions and answers to M
 ## Features
 
 - **One-Click Export**: Instantly copy FastGPT conversations to Markdown format
+- **Export History**: Never lose your exports! All exports are automatically saved to history
+  - Access previous exports anytime from the history page
+  - Copy any export back to clipboard
+  - Download exports as markdown files
+  - Configurable history limit (1-200 items)
 - **Modern Chrome Extension**: Built with Manifest V3 and modern JavaScript APIs
 - **Customizable Options**: Configure what gets exported (questions, timestamps, source URLs)
 - **Keyboard Shortcuts**: Quick access via configurable keyboard shortcuts
@@ -40,6 +45,18 @@ This extension is not yet published to the Chrome Web Store.
 
 You can customize these shortcuts at `chrome://extensions/shortcuts`
 
+### Method 3: Access Export History
+
+Never lose an export again! All your exports are automatically saved.
+
+1. Click the extension icon and then click the "History" button
+2. Or go to Options and click "View History"
+3. From the history page you can:
+   - Copy any previous export to clipboard
+   - Download exports as `.md` files
+   - View export metadata (timestamp, source URL)
+   - Delete individual exports or clear all history
+
 ## Configuration
 
 Click the extension icon and select "Options" to configure:
@@ -48,6 +65,7 @@ Click the extension icon and select "Options" to configure:
 - **Remove Headers**: Remove H3 headers from answers
 - **Add Timestamp**: Include export date/time
 - **Add Source URL**: Add a link to the original FastGPT page
+- **Maximum History Items**: How many exports to keep (1-200, default 50)
 
 ## Technical Details
 
@@ -66,15 +84,19 @@ This extension uses the latest Chrome Extension APIs:
 ```
 fastgpt-to-md/
 ├── manifest.json          # Extension configuration (MV3)
-├── background.js          # Service worker for keyboard shortcuts
+├── background.js          # Service worker for keyboard shortcuts & history
 ├── popup/                 # Extension popup UI
 │   ├── popup.html
-│   ├── popup.js          # Modern async/await, native Promises
+│   ├── popup.js          # Modern async/await, native Promises, history saving
 │   └── popup.css         # Styled UI with status messages
 ├── options/              # Settings page
 │   ├── options.html
 │   ├── options.js
 │   └── options.css
+├── history/              # Export history viewer
+│   ├── history.html      # Full-page history interface
+│   ├── history.js        # History management, copy, download, delete
+│   └── history.css       # Modern dark theme
 ├── libs/
 │   └── turndown.umd.js   # HTML to Markdown converter
 └── images/               # Extension icons
@@ -84,7 +106,9 @@ fastgpt-to-md/
 
 - **scripting**: Execute scripts on Kagi pages to extract content
 - **activeTab**: Access the currently active tab
-- **storage**: Save user preferences
+- **storage**: Save user preferences and export history
+  - `chrome.storage.sync`: User settings (max 100KB)
+  - `chrome.storage.local`: Export history (unlimited)
 
 ## Development
 
