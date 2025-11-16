@@ -1,7 +1,7 @@
 body {
   margin: 0;
-  width: 250px;
-  min-height: 120px;
+  width: 260px;
+  min-height: 140px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -17,8 +17,12 @@ body {
 
 .container {
   display: flex;
+  flex-direction: column;
+  gap: 8px;
   margin-top: 16px;
   justify-content: center;
+  align-items: stretch;
+  width: 220px;
 }
 
 h3 {
@@ -54,6 +58,38 @@ button#copyButton:disabled {
   background-color: #666;
   cursor: not-allowed;
   opacity: 0.6;
+}
+
+.secondary-button {
+  color: #e0e0e0;
+  font-size: 14px;
+  cursor: pointer;
+  border: 1px solid #5d5d6d;
+  outline: none !important;
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: #3d3d4d;
+  padding: 8px 16px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.secondary-button:hover {
+  background-color: #4d4d5d;
+  border-color: #7d7d8d;
+}
+
+.secondary-button:active {
+  background-color: #2d2d3d;
+  transform: scale(0.98);
+}
+
+.secondary-button svg {
+  flex-shrink: 0;
 }
 
 .status-message {

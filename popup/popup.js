@@ -1,6 +1,14 @@
 document.addEventListener('DOMContentLoaded', function () {
   const copyButton = document.getElementById('copyButton');
   const statusMessage = document.getElementById('statusMessage');
+  const historyButton = document.getElementById('historyButton');
+
+  // Open history page
+  if (historyButton) {
+    historyButton.addEventListener('click', () => {
+      chrome.tabs.create({ url: chrome.runtime.getURL('history/history.html') });
+    });
+  }
 
   copyButton.addEventListener('click', async () => {
     try {
@@ -34,16 +42,20 @@ document.addEventListener('DOMContentLoaded', function () {
         throw new Error('Failed to extract content from page');
       }
 
-      const htmlContent = results[0].result;
+      const result = results[0].result;
 
-      // Check for error responses
-      if (htmlContent === 'not found') {
-        throw new Error('FastGPT content not found on page');
+      // Handle error responses
+      if (typeof result === 'string') {
+        if (result === 'not found') {
+          throw new Error('FastGPT content not found on page');
+        }
+        if (result === 'no question') {
+          throw new Error('Question field not found on page');
+        }
       }
 
-      if (htmlContent === 'no question') {
-        throw new Error('Question field not found on page');
-      }
+      const htmlContent = result.html;
+      const question = result.question;
 
       // Get user settings
       const settings = await chrome.storage.sync.get({
@@ -53,8 +65,8 @@ document.addEventListener('DOMContentLoaded', function () {
         addSourceUrl: true
       });
 
-      // Convert to markdown
-      await copyResultToClipboard(htmlContent, settings, activeTab.url);
+      // Convert to markdown and save to history
+      await copyResultToClipboard(htmlContent, settings, activeTab.url, question);
 
       showStatus('Copied to clipboard!', 'success');
     } catch (error) {
@@ -65,7 +77,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 
-  async function copyResultToClipboard(htmlContent, settings, sourceUrl) {
+  async function copyResultToClipboard(htmlContent, settings, sourceUrl, question) {
     const turndownService = new TurndownService();
     let markdownContent = turndownService.turndown(htmlContent);
 
@@ -84,9 +96,45 @@ document.addEventListener('DOMContentLoaded', function () {
     try {
       await navigator.clipboard.writeText(markdownContent);
       console.log('Text copied to clipboard successfully');
+
+      // Save to history
+      await saveToHistory(markdownContent, question, sourceUrl);
     } catch (error) {
       console.error('Error copying text to clipboard:', error);
       throw new Error('Failed to copy to clipboard. Please grant clipboard permissions.');
+    }
+  }
+
+  async function saveToHistory(content, question, url) {
+    try {
+      // Get current history
+      const { exportHistory = [] } = await chrome.storage.local.get('exportHistory');
+
+      // Get max history limit from settings (default 50)
+      const { maxHistoryItems = 50 } = await chrome.storage.sync.get('maxHistoryItems');
+
+      // Create new history item
+      const historyItem = {
+        content,
+        question,
+        url,
+        timestamp: Date.now()
+      };
+
+      // Add to beginning of array
+      exportHistory.unshift(historyItem);
+
+      // Trim to max limit
+      if (exportHistory.length > maxHistoryItems) {
+        exportHistory.splice(maxHistoryItems);
+      }
+
+      // Save back to storage
+      await chrome.storage.local.set({ exportHistory });
+      console.log('Saved to history');
+    } catch (error) {
+      console.error('Error saving to history:', error);
+      // Don't throw - history save failure shouldn't block the main operation
     }
   }
 
@@ -121,17 +169,23 @@ document.addEventListener('DOMContentLoaded', function () {
       return 'not found';
     }
 
+    // Clone to avoid modifying the actual page
+    const mainClone = main.cloneNode(true);
+
     // Modern DOM method - remove() instead of removeChild()
-    const h3Element = main.querySelector('h3');
+    const h3Element = mainClone.querySelector('h3');
     if (h3Element) {
       h3Element.remove();
     }
 
     const formattedContent = `
-    <h2>Question</h2><br>${question}<h2>Answer</h2><br>${main.outerHTML}
+    <h2>Question</h2><br>${question}<h2>Answer</h2><br>${mainClone.outerHTML}
     `;
 
-    return formattedContent;
+    return {
+      html: formattedContent,
+      question: question
+    };
   }
 
 });
